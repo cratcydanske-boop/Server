@@ -1,0 +1,31 @@
+name: Bygg
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [mottakstest, vakthund]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+          key: pio-${{ matrix.project }}-${{ hashFiles(format('{0}/platformio.ini', matrix.project)) }}
+          restore-keys: pio-${{ matrix.project }}-
+      - run: pip install platformio==6.1.16
+      - name: Lag dummy secrets.h (berre vakthund; ekte fil er gitignored)
+        if: matrix.project == 'vakthund'
+        run: cp vakthund/include/secrets.example.h vakthund/include/secrets.h
+      - name: Kompiler ${{ matrix.project }}
+        run: pio run -d ${{ matrix.project }}

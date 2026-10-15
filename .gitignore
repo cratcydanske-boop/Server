@@ -1,0 +1,6 @@
+.pio/
+.vscode/
+*.pyc
+# Hemmelegheiter – skal aldri i git
+secrets.h
+!secrets.example.h
